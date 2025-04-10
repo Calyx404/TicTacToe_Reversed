@@ -6,21 +6,25 @@ DATE:           YYYY-MM-DD
 DESCRIPTION:    Description goes here
 '''
 
-import os, random, time
+import os, random
 # from colorama import Fore
+from datetime import datetime, timedelta
 from utils import *
 from game import *
 from player import *
+from bot import *
 
 
 def main():
 
-    # banner.show_title()
-    # banner.start_game()
+    splash.full(text="PRESS 'ENTER' TO START GAME")
+    log_handler.log("Start game")
+    splash.load(text="Loading Game")
 
-    # loader.load()
-
+    # Main Menu
     while True:
+        splash.title()
+
         main_menu = menu.Menu(title="Main Menu", selection=menu.main_menu, columns=3)
         main_menu.display()
 
@@ -34,40 +38,123 @@ def main():
                 continue
 
             else:
+                if int(main_menu_choice) != len(menu.main_menu):
+                    splash.load(text=f"Loading {menu.main_menu[int(main_menu_choice)]}")
                 break
 
         # Play vs. Bot
         if main_menu_choice == '1':
-            bot_menu = menu.Menu(title="Play vs. Bot", selection=menu.bot_menu, columns=2)
-            bot_menu.display()
 
+            # Difficulty Menu
             while True:
-                try:
-                    bot_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.bot_menu)}] : ").strip()
-                    input_handler.validate(input_=bot_menu_choice, type="int menu", selection=menu.bot_menu)
+                bot_menu = menu.Menu(title="Play vs. Bot", selection=menu.bot_menu, columns=2)
+                bot_menu.display()
 
-                except Exception as e:
-                    input_handler.alert(error=e)
-                    continue
+                while True:
+                    try:
+                        bot_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.bot_menu)}] : ").strip()
+                        input_handler.validate(input_=bot_menu_choice, type="int menu", selection=menu.bot_menu)
 
-                else:
-                    break
+                    except Exception as e:
+                        input_handler.alert(error=e)
+                        continue
 
-            # Easy
-            if bot_menu_choice == '1':
-                game_board = Board(size=settings.grid_size)
-                winner = None
+                    else:
+                        if int(bot_menu_choice) != len(menu.bot_menu):
+                            splash.load(text=f"Loading {menu.bot_menu[int(bot_menu_choice)]} Round")
+                        break
 
-                game_board.display()
+                # Easy
+                if bot_menu_choice == '1':
 
-                while winner == None:
-                    in_turn = settings.next_move
+                    while True:
+                        players = [settings.username, "Bot"]
+                        board = Board(size=settings.grid_size)
+                        winner = None
+                        turn = first_move
 
-                    if in_turn == "Player":
+                        board.display()
+
+                        while winner is None:
+
+                            # Get Move
+                            in_turn = players[turn]
+
+                            if in_turn == settings.username:
+                                start_time = datetime.now()
+
+                                moves = board.player_moves.copy()
+                                moves.extend(board.opponent_moves)
+
+                                while True:
+                                    try:
+                                        move = input(f"Your turn : ")
+                                        input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
+
+                                    except Exception as e:
+                                        input_handler.alert(error=e)
+                                        continue
+
+                                    else:
+                                        break
+
+                                end_time = datetime.now()
+
+                            if in_turn == "Bot":
+                                start_time = datetime.now()
+
+                                moves = board.player_moves.copy()
+                                moves.extend(board.opponent_moves)
+
+                                move = easy.move(settings.grid_size, delay=2, occupied=moves)
+                                print(f"Opponent's turn : {move}")
+
+                                end_time = datetime.now()
+
+                            # Update Score
+                            if in_turn == settings.username:
+                                points = board.update_score((end_time - start_time).total_seconds())
+                                board.player_score += points
+                            if in_turn == "Bot":
+                                points = board.update_score((end_time - start_time).total_seconds())
+                                board.opponent_score += points
+
+                            board.log_score(player=in_turn, points=points, move=move)
+
+                            # Update Board
+                            if in_turn == settings.username:
+                                board.player_moves.append(int(move))
+                            if in_turn == "Bot":
+                                board.opponent_moves.append(int(move))
+
+                            # Display Board
+                            board.display()
+
+                            # TODO : Evaluate Board
+                            if board.board[0][0] != 1:
+                                bonus_points = 20
+                                if in_turn == settings.username:
+                                    board.player_score += bonus_points
+                                if in_turn == "Bot":
+                                    board.opponent_score += bonus_points
+
+                                board.log_score(player=in_turn, points=bonus_points, move=move)
+                                board.display()
+
+                                winner = settings.username if board.player_score > board.opponent_score else "Bot"
+                                print(f'{winner} wins!')
+
+                            else:
+                                turn = 1 - turn
+
+                        # Round Menu
+                        round_menu = menu.Menu(title="Play vs. Bot", selection=menu.round_menu, columns=3)
+                        round_menu.display()
+
                         while True:
                             try:
-                                move = input(f"{in_turn}'s move : ")
-                                input_handler.validate(input_=move, type="int move", selection=game_board.board)
+                                round_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.round_menu)}] : ").strip()
+                                input_handler.validate(input_=round_menu_choice, type="int menu", selection=menu.round_menu)
 
                             except Exception as e:
                                 input_handler.alert(error=e)
@@ -75,67 +162,250 @@ def main():
 
                             else:
                                 break
-                    else:
-                        move = random.randint(1,9)
-                        print(f"{in_turn}'s move : Computer is thinking...", end="\r")
-                        time.sleep(3)
-                        print(f"{in_turn}'s move : {move}                     ")
 
+                        # Keep Playing
+                        if round_menu_choice == '1':
+                            board.reset_board()
+                            continue
 
-                    # Moderate
-                    # 1. Update Board:
-                    if in_turn == "Player":
-                        game_board.player.append(int(move))
-                    else:
-                        game_board.opponent.append(int(move))
+                        else:
+                            break
 
-                    game_board.display()
+                    # New Game
+                    if round_menu_choice == '2':
+                        board.reset_all()
+                        splash.load(text=f"Restarting Progress")
+                        continue
 
-                    # 2. Update Score:
+                    # Back to Main Menu
+                    elif round_menu_choice == '3':
+                        splash.load(text=f"Going Back to Main Menu")
+                        break
 
-                    # 3. Evaluate:
-                    if game_board.board[0][0] != 1:
-                        winner = in_turn
+                # Medium
+                elif bot_menu_choice == '2':
 
-                    else:
-                        settings.next_move = settings.prev_move
-                        settings.prev_move = in_turn
+                    print(bot_menu_choice)
 
-                print(f'{winner} wins!')
-                game_board.reset()
+                # Difficult
+                elif bot_menu_choice == '3':
 
-            # Medium
-            elif bot_menu_choice == '2':
-                print(bot_menu_choice)
+                    print(bot_menu_choice)
 
-            # Difficult
-            elif bot_menu_choice == '3':
-                print(bot_menu_choice)
-
-            # Back to Main Menu
-            elif bot_menu_choice == '4':
-                print(bot_menu_choice)
-                continue
+                # Back to Main Menu
+                elif bot_menu_choice == '4':
+                    splash.load(text=f"Going Back to Main Menu")
+                    break
 
         # Play vs. Friend
         elif main_menu_choice == '2':
-            print(main_menu_choice)
+            opponent = "Friend"
+
+            # Friend Menu
+            while True:
+                friend_menu = menu.Menu(title="Play vs. Friend", selection=menu.friend_menu, columns=3)
+                friend_menu.display()
+
+                while True:
+                    try:
+                        friend_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.friend_menu)}] : ").strip()
+                        input_handler.validate(input_=friend_menu_choice, type="int menu", selection=menu.friend_menu)
+
+                    except Exception as e:
+                        input_handler.alert(error=e)
+                        continue
+
+                    else:
+                        break
+
+                # Start Game
+                if friend_menu_choice == '1':
+
+                    splash.load(text=f"Loading Board")
+
+                    while True:
+                        players = [settings.username, opponent]
+                        board = Board(size=settings.grid_size)
+                        winner = None
+                        turn = first_move
+
+                        board.display()
+
+                        while winner is None:
+
+                            in_turn = players[turn]
+
+                            if in_turn == settings.username:
+                                start_time = datetime.now()
+
+                                moves = board.player_moves.copy()
+                                moves.extend(board.opponent_moves)
+
+                                while True:
+                                    try:
+                                        move = input(f"Your turn : ")
+                                        input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
+
+                                    except Exception as e:
+                                        input_handler.alert(error=e)
+                                        continue
+
+                                    else:
+                                        break
+
+                                end_time = datetime.now()
+
+                            if in_turn == opponent:
+                                start_time = datetime.now()
+
+                                moves = board.player_moves.copy()
+                                moves.extend(board.opponent_moves)
+
+                                while True:
+                                    try:
+                                        move = input(f"Opponent's turn : ")
+                                        input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
+
+                                    except Exception as e:
+                                        input_handler.alert(error=e)
+                                        continue
+
+                                    else:
+                                        break
+
+                                end_time = datetime.now()
+
+                            # Update Score:
+                            if in_turn == settings.username:
+                                points = board.update_score((end_time - start_time).total_seconds())
+                                board.player_score += points
+                            if in_turn == opponent:
+                                points = board.update_score((end_time - start_time).total_seconds())
+                                board.opponent_score += points
+
+                            board.log_score(player=in_turn, points=points, move=move)
+
+                            # Update Board:
+                            if in_turn == settings.username:
+                                board.player_moves.append(int(move))
+                            if in_turn == opponent:
+                                board.opponent_moves.append(int(move))
+
+                            # Display Board:
+                            board.display()
+
+                            # Check Winner:
+                            if board.board[0][0] != 1:
+                                bonus_points = 20
+                                if in_turn == settings.username:
+                                    board.player_score += bonus_points
+                                if in_turn == opponent:
+                                    board.opponent_score += bonus_points
+
+                                board.log_score(player=in_turn, points=bonus_points, move=move)
+                                board.display()
+
+                                winner = settings.username if board.player_score > board.opponent_score else "Bot"
+                                print(f'{winner} wins!')
+
+                            else:
+                                turn = 1 - turn
+
+                        # Round Menu
+                        round_menu = menu.Menu(title="Play vs. Bot", selection=menu.round_menu, columns=3)
+                        round_menu.display()
+
+                        while True:
+                            try:
+                                round_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.round_menu)}] : ").strip()
+                                input_handler.validate(input_=round_menu_choice, type="int menu", selection=menu.round_menu)
+
+                            except Exception as e:
+                                input_handler.alert(error=e)
+                                continue
+
+                            else:
+                                break
+
+                        # Keep Playing
+                        if round_menu_choice == '1':
+                            board.reset_board()
+                            continue
+
+                        # New Game
+                        elif round_menu_choice == '2':
+                            board.reset_all()
+                            splash.load(text=f"Restarting Progress")
+                            continue
+
+                        # Back to Main Menu
+                        elif round_menu_choice == '3':
+                            splash.load(text=f"Going Back to Main Menu")
+                            break
+
+                # Set Friend's Name
+                elif friend_menu_choice == '2':
+                    while True:
+                        try:
+                            friend = input(f"Enter a name for your friend : ").strip()
+                            input_handler.validate(input_=friend, type="str limit")
+
+                        except Exception as e:
+                            input_handler.alert(error=e)
+                            continue
+
+                        else:
+                            break
+
+                    save_menu = menu.Menu(title="Save Changes", selection=menu.save_menu, columns=2)
+                    save_menu.display()
+
+                    while True:
+                        try:
+                            save_menu_choice = input(f"Enter your selection from the menu [1-{len(menu.save_menu)}] : ").strip()
+                            input_handler.validate(input_=save_menu_choice, type="int menu", selection=menu.save_menu)
+
+                        except Exception as e:
+                            input_handler.alert(error=e)
+                            continue
+
+                        else:
+                            break
+
+                    # Cancel
+                    if save_menu_choice == '1':
+                        splash.load(text=f"Cancelling Changes")
+                        continue
+
+                    # Save
+                    elif save_menu_choice == '2':
+                        opponent = friend
+                        splash.load(text=f"Saving Changes")
+                        continue
+
+                # Back to Menu
+                elif friend_menu_choice == '3':
+                    splash.load(text=f"Going Back to Main Menu")
+                    break
 
         # Profile
         elif main_menu_choice == '3':
             print(main_menu_choice)
+            continue
 
         # Mechanics
         elif main_menu_choice == '4':
             print(main_menu_choice)
+            continue
 
         # Settings
         elif main_menu_choice == '5':
             print(main_menu_choice)
+            continue
 
         # Quit
         elif main_menu_choice == '6':
-            print(main_menu_choice)
+            splash.load(text=f"Exiting the Game")
             break
 
 if __name__ == '__main__':
