@@ -6,20 +6,25 @@ DATE:           YYYY-MM-DD
 DESCRIPTION:    Description goes here
 '''
 
-import os, random
-# from colorama import Fore
-from datetime import datetime, timedelta
 from utils import *
 from game import *
 from player import *
-from bot import *
-
 
 def main():
+    from os import system
+    from datetime import datetime, timedelta
+    from colorama import init, Fore, Style
 
-    splash.full(text="PRESS 'ENTER' TO START GAME")
-    log_handler.log("Start game")
+    init(autoreset=True)
+
+    system("cls")
+
+    log_handler.log(level="INFO", activity="Application started.")
+
+    splash.start()
     splash.load(text="Loading Game")
+
+    log_handler.log(level="INFO", activity="Application running.")
 
     # Main Menu
     while True:
@@ -62,33 +67,33 @@ def main():
                     else:
                         if int(bot_menu_choice) != len(menu.bot_menu):
                             splash.load(text=f"Loading {menu.bot_menu[int(bot_menu_choice)]} Round")
+
                         break
 
                 # Easy
                 if bot_menu_choice == '1':
 
+                    board = Board(game=f"{menu.main_menu[int(main_menu_choice)].upper()} [{menu.bot_menu[int(bot_menu_choice)].upper()}]", size=settings.grid_size, players=[settings.username, "Computer"])
+
                     while True:
-                        players = [settings.username, "Bot"]
-                        board = Board(size=settings.grid_size)
-                        winner = None
-                        turn = first_move
+                        turn = settings.first_move
 
                         board.display()
 
-                        while winner is None:
+                        while board.result is None:
 
                             # Get Move
-                            in_turn = players[turn]
+                            in_turn = board.players[turn]
 
-                            if in_turn == settings.username:
+                            if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
 
-                                moves = board.player_moves.copy()
-                                moves.extend(board.opponent_moves)
+                                moves = board.player_moves + board.opponent_moves
 
                                 while True:
                                     try:
-                                        move = input(f"Your turn : ")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}")
+                                        print(Style.RESET_ALL)
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
                                     except Exception as e:
@@ -100,49 +105,62 @@ def main():
 
                                 end_time = datetime.now()
 
-                            if in_turn == "Bot":
+                            if in_turn == board.players[1]: # Opponent
                                 start_time = datetime.now()
 
-                                moves = board.player_moves.copy()
-                                moves.extend(board.opponent_moves)
+                                moves = board.player_moves + board.opponent_moves
 
-                                move = easy.move(settings.grid_size, delay=2, occupied=moves)
-                                print(f"Opponent's turn : {move}")
+                                move = bot.easy(size=settings.grid_size, delay=5.25, occupied=moves)
+                                print(f"{Style.BRIGHT}{Fore.RED}{f"Opponent's turn [O] : {move}"}")
 
                                 end_time = datetime.now()
 
                             # Update Score
-                            if in_turn == settings.username:
-                                points = board.update_score((end_time - start_time).total_seconds())
+                            if in_turn == board.players[0]: # Player
+                                points = board.update_score(time=(end_time - start_time).total_seconds())
                                 board.player_score += points
-                            if in_turn == "Bot":
-                                points = board.update_score((end_time - start_time).total_seconds())
+                            if in_turn == board.players[1]: # Opponent
+                                points = board.update_score(time=(end_time - start_time).total_seconds())
                                 board.opponent_score += points
 
                             board.log_score(player=in_turn, points=points, move=move)
 
                             # Update Board
-                            if in_turn == settings.username:
+                            if in_turn == board.players[0]: # Player
                                 board.player_moves.append(int(move))
-                            if in_turn == "Bot":
+                            if in_turn == board.players[1]: # Opponent
                                 board.opponent_moves.append(int(move))
 
                             # Display Board
                             board.display()
 
-                            # TODO : Evaluate Board
-                            if board.board[0][0] != 1:
+                            # Evaluate Board
+                            if board.evaluate(in_turn=in_turn, in_turn_symbol=f"{"O" if in_turn == board.players[1] else "X"}"):
+
                                 bonus_points = 20
-                                if in_turn == settings.username:
-                                    board.player_score += bonus_points
-                                if in_turn == "Bot":
+
+                                if in_turn == board.players[0]: # Player
                                     board.opponent_score += bonus_points
+                                if in_turn == board.players[1]: # Opponent
+                                    board.player_score += bonus_points
 
-                                board.log_score(player=in_turn, points=bonus_points, move=move)
+                                if board.player_score > board.opponent_score:
+                                    win_text = "YOU WIN"
+                                    win_fore = "GREEN"
+                                elif board.player_score < board.opponent_score:
+                                    win_text = "YOU LOST"
+                                    win_fore = "RED"
+                                else:
+                                    win_text = "DRAW"
+                                    win_fore = "YELLOW"
+
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.result = win_text
+
+                                splash.line(fore=win_fore)
+                                splash.ascii_art(text=win_text, fore=win_fore)
                                 board.display()
-
-                                winner = settings.username if board.player_score > board.opponent_score else "Bot"
-                                print(f'{winner} wins!')
+                                splash.line(fore=win_fore)
 
                             else:
                                 turn = 1 - turn
@@ -173,12 +191,14 @@ def main():
 
                     # New Game
                     if round_menu_choice == '2':
+                        # save game info on json
                         board.reset_all()
-                        splash.load(text=f"Restarting Progress")
+                        splash.load(text=f"Starting New Game")
                         continue
 
                     # Back to Main Menu
                     elif round_menu_choice == '3':
+                        # save game info on json
                         splash.load(text=f"Going Back to Main Menu")
                         break
 
@@ -199,7 +219,6 @@ def main():
 
         # Play vs. Friend
         elif main_menu_choice == '2':
-            opponent = "Friend"
 
             # Friend Menu
             while True:
@@ -216,34 +235,32 @@ def main():
                         continue
 
                     else:
+                        board = Board(game=f"{menu.main_menu[int(main_menu_choice)].upper()}", size=settings.grid_size, players=[settings.username, "Friend"])
                         break
 
                 # Start Game
                 if friend_menu_choice == '1':
 
-                    splash.load(text=f"Loading Board")
+                    splash.load(text=f"Starting Game")
 
                     while True:
-                        players = [settings.username, opponent]
-                        board = Board(size=settings.grid_size)
-                        winner = None
-                        turn = first_move
+                        turn = settings.first_move
 
                         board.display()
 
-                        while winner is None:
+                        while board.result is None:
 
-                            in_turn = players[turn]
+                            # Get Move
+                            in_turn = board.players[turn]
 
-                            if in_turn == settings.username:
+                            if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
 
-                                moves = board.player_moves.copy()
-                                moves.extend(board.opponent_moves)
+                                moves = board.player_moves + board.opponent_moves
 
                                 while True:
                                     try:
-                                        move = input(f"Your turn : ")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}{Style.RESET_ALL}")
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
                                     except Exception as e:
@@ -255,15 +272,14 @@ def main():
 
                                 end_time = datetime.now()
 
-                            if in_turn == opponent:
+                            if in_turn == board.players[1]: # Opponent
                                 start_time = datetime.now()
 
-                                moves = board.player_moves.copy()
-                                moves.extend(board.opponent_moves)
+                                moves = board.player_moves + board.opponent_moves
 
                                 while True:
                                     try:
-                                        move = input(f"Opponent's turn : ")
+                                        move = input(f"{Style.BRIGHT}{Fore.RED}{"Opponent's turn [O] : "}{Style.RESET_ALL}")
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
                                     except Exception as e:
@@ -275,38 +291,52 @@ def main():
 
                                 end_time = datetime.now()
 
-                            # Update Score:
-                            if in_turn == settings.username:
-                                points = board.update_score((end_time - start_time).total_seconds())
+                            # Update Score
+                            if in_turn == board.players[0]: # Player
+                                points = board.update_score(time=(end_time - start_time).total_seconds())
                                 board.player_score += points
-                            if in_turn == opponent:
-                                points = board.update_score((end_time - start_time).total_seconds())
+                            if in_turn == board.players[1]: # Opponent
+                                points = board.update_score(time=(end_time - start_time).total_seconds())
                                 board.opponent_score += points
 
                             board.log_score(player=in_turn, points=points, move=move)
 
-                            # Update Board:
-                            if in_turn == settings.username:
+                            # Update Board
+                            if in_turn == board.players[0]: # Player
                                 board.player_moves.append(int(move))
-                            if in_turn == opponent:
+                            if in_turn == board.players[1]: # Opponent
                                 board.opponent_moves.append(int(move))
 
-                            # Display Board:
+                            # Display Board
                             board.display()
 
-                            # Check Winner:
-                            if board.board[0][0] != 1:
+                            # Evaluate Board
+                            if board.evaluate(in_turn=in_turn, in_turn_symbol=f"{"O" if in_turn == board.players[1] else "X"}"):
+
                                 bonus_points = 20
-                                if in_turn == settings.username:
-                                    board.player_score += bonus_points
-                                if in_turn == opponent:
+
+                                if in_turn == board.players[0]: # Player
                                     board.opponent_score += bonus_points
+                                if in_turn == board.players[1]: # Opponent
+                                    board.player_score += bonus_points
 
-                                board.log_score(player=in_turn, points=bonus_points, move=move)
+                                if board.player_score > board.opponent_score:
+                                    win_text = "GREEN WINS"
+                                    win_fore = "GREEN"
+                                elif board.player_score < board.opponent_score:
+                                    win_text = "RED WINS"
+                                    win_fore = "RED"
+                                else:
+                                    win_text = "DRAW"
+                                    win_fore = "YELLOW"
+
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.result = win_text
+
+                                splash.line(fore=win_fore)
+                                splash.ascii_art(text=win_text, fore=win_fore)
                                 board.display()
-
-                                winner = settings.username if board.player_score > board.opponent_score else "Bot"
-                                print(f'{winner} wins!')
+                                splash.line(fore=win_fore)
 
                             else:
                                 turn = 1 - turn
@@ -334,17 +364,21 @@ def main():
 
                         # New Game
                         elif round_menu_choice == '2':
+                            # save game info on json
                             board.reset_all()
-                            splash.load(text=f"Restarting Progress")
+                            splash.load(text=f"Starting New Game")
                             continue
 
                         # Back to Main Menu
                         elif round_menu_choice == '3':
+                            # save game info on json
                             splash.load(text=f"Going Back to Main Menu")
                             break
 
                 # Set Friend's Name
                 elif friend_menu_choice == '2':
+                    splash.load(text=f"Setting Up")
+
                     while True:
                         try:
                             friend = input(f"Enter a name for your friend : ").strip()
@@ -357,7 +391,7 @@ def main():
                         else:
                             break
 
-                    save_menu = menu.Menu(title="Save Changes", selection=menu.save_menu, columns=2)
+                    save_menu = menu.Menu(title="Save Preferences", selection=menu.save_menu, columns=2)
                     save_menu.display()
 
                     while True:
@@ -374,13 +408,13 @@ def main():
 
                     # Cancel
                     if save_menu_choice == '1':
-                        splash.load(text=f"Cancelling Changes")
+                        splash.load(text=f"Reverting Changes")
                         continue
 
                     # Save
                     elif save_menu_choice == '2':
-                        opponent = friend
-                        splash.load(text=f"Saving Changes")
+                        board.players[1] = friend
+                        splash.load(text=f"Updating Preferences")
                         continue
 
                 # Back to Menu
@@ -388,26 +422,30 @@ def main():
                     splash.load(text=f"Going Back to Main Menu")
                     break
 
-        # Profile
+        # TODO: Profile
         elif main_menu_choice == '3':
             print(main_menu_choice)
             continue
 
-        # Mechanics
+        # TODO: Mechanics
         elif main_menu_choice == '4':
-            print(main_menu_choice)
+            mechanics.display()
+            splash.load(text="Going Back to Main Menu")
             continue
 
-        # Settings
+        # TODO: Settings
         elif main_menu_choice == '5':
             print(main_menu_choice)
             continue
 
         # Quit
         elif main_menu_choice == '6':
-            splash.load(text=f"Exiting the Game")
+            splash.load(text="Exiting the Game")
+            log_handler.log(level="INFO", activity="Application closed.")
             break
 
+        # TODO: Unexpected Termination
+        log_handler.log(level="ERROR", activity="Application closed unexpectedly.")
+
 if __name__ == '__main__':
-    os.system("cls")
     main()
