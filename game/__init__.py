@@ -1,4 +1,3 @@
-from .splash import *
 from .board import *
 from .bot import *
 from .mechanics import *
