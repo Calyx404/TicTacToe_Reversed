@@ -50,7 +50,7 @@ class Board:
                     row[row.index(tile)] = "O"
 
         # Header
-        game_board_header = emphasis(text=f'{self.game:^{game_board_width - 2}}', fore="BLUE")
+        game_board_header = emphasis(text=f'{self.game.upper():^{game_board_width - 2}}', fore="BLUE")
         score_board_header = emphasis(text=f'{"SCORE BOARD":^{score_board_width - 2}}', fore="BLUE")
 
         print(f'\n{board_border(char="-", end="  ", width=game_board_width)}  {board_border(char="-", end="  ", width=score_board_width)}')
@@ -132,7 +132,7 @@ class Board:
         # Bottom border
         print(f' {tile_border(char="-", end="   ")}\n')
 
-    def evaluate(self, in_turn:str, in_turn_symbol:str) -> bool:
+    def evaluate_board(self, in_turn:str, in_turn_symbol:str) -> bool:
         # Horizontal
         for row in self.board:
             if all(cell == in_turn_symbol for cell in row):
@@ -153,6 +153,29 @@ class Board:
 
         # No Spaces Left
         return all(isinstance(tile, str) for row in self.board for tile in row)
+
+    def evaluate_points(self):
+        from utils.splash import line, ascii
+
+        if self.player_score > self.opponent_score:
+            win_text = "YOU WIN"
+            win_fore = "GREEN"
+            win_pattern = "X-"
+        elif self.player_score < self.opponent_score:
+            win_text = "YOU LOST"
+            win_fore = "RED"
+            win_pattern = "O-"
+        else:
+            win_text = "DRAW"
+            win_fore = "YELLOW"
+            win_pattern = "X-O-"
+
+        self.result = win_text
+
+        line(fore=win_fore, pattern=win_pattern)
+        ascii(text=win_text, fore=win_fore)
+        self.display()
+        line(fore=win_fore, pattern=win_pattern)
 
     def update_score(self, time:float) -> int:
         if time <= 2:

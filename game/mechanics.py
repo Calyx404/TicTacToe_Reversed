@@ -1,8 +1,7 @@
 def display():
     from colorama import Fore, Style, init
-    from keyboard import wait
+    from utils.splash import wait
 
-    init(autoreset=True)
     highlight = lambda text: f"{Style.BRIGHT}{Fore.BLUE}{text}{Style.RESET_ALL}"
 
     print(f"""
@@ -22,9 +21,7 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
@@ -41,9 +38,7 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
@@ -51,7 +46,7 @@ def display():
 |                                                                                                                                    |
 |    [1] {highlight("Play vs. Bot")}     — Start a match against the undefeatable computer.                                                         |
 |    [2] {highlight("Play vs. Friend")}  — Enjoy a time-based match with a fellow human.                                                            |
-|    [3] {highlight("Achievements")}     — View profile stats & saved scores                                                                        |
+|    [3] {highlight("Achievements")}     — View profile stats & saved scores.                                                                       |
 |    [4] {highlight("How to Play")}      — That's this screen you're reading now!                                                                   |
 |    [5] {highlight("Settings")}         — Adjust game preferences and sign in to save progress.                                                    |
 |    [6] {highlight("Quit")}             — Exit from the game.                                                                                      |
@@ -59,9 +54,7 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
@@ -76,18 +69,16 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
 | 🧮 {highlight("Scoring System")}                                                                                                                  |
 |                                                                                                                                    |
 |    ⚡ {highlight("Speed = Points")}                                                                                                               |
-|       - Move within 2 seconds: +10 points                                                                                          |
-|       - Move within 3-5 seconds: +05 points                                                                                        |
-|       - Move after 5 seconds: +01 pointt                                                                                           |
+|       - Move within 2 seconds:   {highlight("+10 points")}                                                                                        |
+|       - Move within 3-5 seconds: {highlight("+05 points")}                                                                                        |
+|       - Move after 5 seconds:    {highlight("+01 points")}                                                                                        |
 |                                                                                                                                    |
 |    🌟 {highlight("Bonus Points")}                                                                                                                 |
 |       - +20 pts if you survive the whole round without creating a line!                                                            |
@@ -100,9 +91,7 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
@@ -115,23 +104,19 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
 | 🛑 {highlight("Mid-Game Actions")}                                                                                                                |
 |                                                                                                                                    |
-|    [e] {highlight("Exit the game")}  — no saves, no mercy                                                                                          |
-|    [p] {highlight("Pause the game")} — board hides, pause menu overlays                                                                           |
+|    [esc]   {highlight("Exit the game")} — no saves, no mercy                                                                                      |
+|    [space] {highlight("Pause the game")} — board hides, pause menu overlays                                                                       |
 |                                                                                                                                    |
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'RIGHT ARROW' TO CONTINUE...")}", end="\r", flush=True)
-
-    wait("right")
+    wait(key=b' ', name="space", action="continue", end="\r")
 
     print(f"""  ----------------------------------------------------------------------------------------------------------------------------------
 |                                                                                                                                    |
@@ -144,6 +129,4 @@ def display():
   ----------------------------------------------------------------------------------------------------------------------------------
     """)
 
-    print(f"{highlight("PRESS 'ESC' TO GO BACK TO MAIN MENU...")}")
-
-    wait("esc")
+    wait(key=b'\x1b', name="esc", action="go back to main menu")
