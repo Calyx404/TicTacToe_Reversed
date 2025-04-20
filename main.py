@@ -1,17 +1,16 @@
 '''
-PROJECT:        TicTacToeReversed - A Reversed Tic-Tac-Toe Game
+PROJECT: TicTacToeReversed - A Reversed Tic-Tac-Toe Game
 
-AUTHORS:        Raymond Allen Agustin & Basiliza Binay-an
-DATE:           YYYY-MM-DD
-DESCRIPTION:    Description goes here
+AUTHORS: Raymond Allen Agustin & Basiliza Binay-an
+DATE:    2025-04-21
+VERSION: 1.0.0
 '''
 
 '''
 TODO:
 - timer for play vs friend
 - threading for displaying board
-- pause and resume game
-- rage quit
+- pause mid game
 '''
 
 from core import *
@@ -27,7 +26,7 @@ def main():
     log_handler.log(level="INFO", activity="Application started.")
 
     player = settings.player
-    splash.start()
+    # splash.start()
 
     log_handler.log(level="INFO", activity="Application running.")
 
@@ -95,9 +94,43 @@ def main():
                                 start_time = datetime.now()
 
                                 while True:
+
                                     try:
-                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}").strip()
                                         print(Style.RESET_ALL)
+
+                                        # if move.upper() == 'PAUSE':
+                                        #     splash.clear()
+                                        #     pause_menu = Menu(title="Game Paused", selection=pause_menu_selection, columns=3)
+                                        #     pause_menu.display()
+
+                                        #     while True:
+                                        #         try:
+                                        #             pause_menu_choice = input(f"Enter your selection from the menu [1-{len(pause_menu_selection)}] : ").strip()
+                                        #             input_handler.validate(input_=pause_menu_choice, type="int menu", selection=pause_menu_selection)
+
+                                        #         except Exception as e:
+                                        #             input_handler.alert(error=e)
+                                        #             continue
+
+                                        #         else:
+                                        #             if int(pause_menu_choice) != len(pause_menu_selection):
+                                        #                 splash.load(text=f"{pause_menu_selection[int(pause_menu_choice)]} Game")
+
+                                        #             break
+
+                                        #     # Resume
+                                        #     if pause_menu_choice == '1':
+                                        #         pause_menu_choice = None
+                                        #         move = None
+                                        #         board.display()
+                                        #         continue
+
+                                        #     else:
+                                        #         break
+
+                                        # else:
+
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
                                     except Exception as e:
@@ -106,6 +139,7 @@ def main():
 
                                     else:
                                         break
+
 
                                 end_time = datetime.now()
 
@@ -151,6 +185,19 @@ def main():
 
                             else:
                                 turn = 1 - turn
+
+                        # Retry
+                        # if pause_menu_choice == '2':
+                        #     pause_menu_choice = None
+                        #     move = None
+                        #     board.reset_all()
+                        #     splash.load(text="Starting New Game")
+                        #     continue
+
+                        # Back to Main Menu
+                        # elif pause_menu_choice == '3':
+                        #     splash.load(text=f"Going Back to Main Menu")
+                        #     break
 
                         # Round Menu
                         round_menu = Menu(title="Play vs. Bot", selection=round_menu_selection, columns=3)
@@ -210,7 +257,7 @@ def main():
 
                                 while True:
                                     try:
-                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}").strip()
                                         print(Style.RESET_ALL)
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
@@ -324,7 +371,7 @@ def main():
 
                                 while True:
                                     try:
-                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}").strip()
                                         print(Style.RESET_ALL)
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
@@ -462,13 +509,15 @@ def main():
                             # Get Move
                             in_turn = board.players[turn]
                             moves = board.player_moves + board.opponent_moves
+                            move = None
 
                             if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
 
                                 while True:
+                                    # TODO: timer
                                     try:
-                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}")
+                                        move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}").strip()
                                         print(Style.RESET_ALL)
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
@@ -485,8 +534,9 @@ def main():
                                 start_time = datetime.now()
 
                                 while True:
+                                    # TODO: timer
                                     try:
-                                        move = input(f"{Style.BRIGHT}{Fore.RED}{"Opponent's turn [O] : "}")
+                                        move = input(f"{Style.BRIGHT}{Fore.RED}{"Opponent's turn [O] : "}").strip()
                                         print(Style.RESET_ALL)
                                         input_handler.validate(input_=move, type="int move", selection=board.board, occupied=moves)
 
@@ -503,17 +553,21 @@ def main():
                             points = board.update_score(time=(end_time - start_time).total_seconds())
 
                             if in_turn == board.players[0]: # Player
-                                board.player_score += points
+                                if move is not None:
+                                    board.player_score += points
                             if in_turn == board.players[1]: # Opponent
-                                board.opponent_score += points
+                                if move is not None:
+                                    board.opponent_score += points
 
                             board.log_score(player=in_turn, points=points, move=move)
 
                             # Update Board
                             if in_turn == board.players[0]: # Player
-                                board.player_moves.append(int(move))
+                                if move is not None:
+                                    board.player_moves.append(int(move))
                             if in_turn == board.players[1]: # Opponent
-                                board.opponent_moves.append(int(move))
+                                if move is not None:
+                                    board.opponent_moves.append(int(move))
 
                             # Display Board
                             board.display()

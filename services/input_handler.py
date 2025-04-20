@@ -40,6 +40,10 @@ def validate(input_:str, type:str, **kwargs) -> None:
     selection = kwargs.get('selection')
     occupied = kwargs.get('occupied', [])
 
+    # Check if input is None
+    if input_ is None:
+        return
+
     # Check if input is empty
     if not input_:
         raise ValueError("Missing input")
@@ -94,3 +98,29 @@ def alert(error) -> None:
     init(autoreset=True)
 
     print(Fore.LIGHTRED_EX + Style.BRIGHT + f"Error : {error}\n")
+
+def timed_input(prompt:str):
+    """
+    Function to get user input with a timeout.
+    If the user doesn't input within the timeout, the program returns None.
+    """
+
+    from threading import Thread
+    from core.settings import player
+
+    user_input = [None]
+    timeout = player.time_limit
+
+    def get_input():
+        user_input[0] = input(prompt)
+
+    input_thread = Thread(target=get_input)
+    input_thread.daemon = True
+    input_thread.start()
+    input_thread.join(10)
+
+    if input_thread.is_alive():
+        print("Time's up!")
+        return None
+
+    return user_input[0]

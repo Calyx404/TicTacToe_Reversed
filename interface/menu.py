@@ -53,6 +53,12 @@ save_menu_selection = {
     2: "Proceed"
 }
 
+pause_menu_selection = {
+    1: "Resume",
+    2: "Retry",
+    3: "Back to Main Menu"
+}
+
 class Menu:
     """
     Represents a menu with a title, selectable options, and a customizable column layout.
