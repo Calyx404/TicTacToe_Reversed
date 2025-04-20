@@ -1,0 +1,5 @@
+# Minimum Python version
+python_version >= 3.8
+
+# Required libraries
+colorama == 0.4.6
