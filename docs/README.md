@@ -129,7 +129,10 @@ TicTacToe-Reversed/
 ├── core/
 │   ├── board.py         # Game board logic
 │   ├── bot.py           # Bot AI logic
+│   ├── mechanics.py     # Game rules and win conditions
+│   ├── settings.py      # Game configurations
 │   ├── player.py        # Player profile management
+│   ├── settings.py      #
 ├── interface/
 │   ├── menu.py          # Menu display and navigation
 │   ├── splash.py        # ASCII art and animations
