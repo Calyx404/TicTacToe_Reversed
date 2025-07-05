@@ -15,8 +15,9 @@ Constants:
 """
 
 from datetime import datetime
+from .db_handler import resource_path
 
-LOG_FILE = './runtime/logs/app.log'
+LOG_FILE = resource_path("runtime/logs/app.log")
 
 def log(level:str, activity:str) -> None:
     """

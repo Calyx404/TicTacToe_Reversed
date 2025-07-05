@@ -18,9 +18,15 @@ Constants:
     - ACCOUNTS_DB (str): The file path to the accounts database.
 """
 
-import os, json
+import os, json, sys
 
-ACCOUNTS_DB = "./runtime/data/accounts.json"
+def resource_path(relative_path):
+    """Get the absolute path to a file inside PyInstaller's temp or dev directory."""
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
+
+
+ACCOUNTS_DB = resource_path("runtime/data/accounts.json")
 
 def _check_file() -> None:
     """
