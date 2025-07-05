@@ -1,7 +1,7 @@
 '''
 PROJECT: TicTacToeReversed - A Reversed Tic-Tac-Toe Game
 
-AUTHORS: Raymond Allen Agustin & Basiliza Binay-an
+AUTHORS: Raymond Allen Agustin
 DATE:    2025-04-21
 VERSION: 1.0.0
 '''
@@ -89,12 +89,13 @@ def main():
                             # Get Move
                             in_turn = board.players[turn]
                             moves = board.player_moves + board.opponent_moves
+                            start_time = None
+                            end_time = None
 
                             if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
 
                                 while True:
-
                                     try:
                                         move = input(f"{Style.BRIGHT}{Fore.GREEN}{"Your turn [X] : "}").strip()
                                         print(Style.RESET_ALL)
@@ -152,20 +153,26 @@ def main():
                                 end_time = datetime.now()
 
                             # Update Score
-                            points = board.update_score(time=(end_time - start_time).total_seconds())
+                            if start_time is not None and end_time is not None:
+                                elapsed = (end_time - start_time).total_seconds()
+                            else:
+                                elapsed = 0
+                            points = board.update_score(time=elapsed)
 
                             if in_turn == board.players[0]: # Player
                                 board.player_score += points
                             if in_turn == board.players[1]: # Opponent
                                 board.opponent_score += points
 
-                            board.log_score(player=in_turn, points=points, move=move)
+                            board.log_score(player=in_turn, points=points, move=-1)
 
                             # Update Board
                             if in_turn == board.players[0]: # Player
-                                board.player_moves.append(int(move))
+                                if move is not None:
+                                    board.player_moves.append(int(move))
                             if in_turn == board.players[1]: # Opponent
-                                board.opponent_moves.append(int(move))
+                                if move is not None:
+                                    board.opponent_moves.append(int(move))
 
                             # Display Board
                             board.display()
@@ -180,7 +187,7 @@ def main():
                                 if in_turn == board.players[1]: # Opponent
                                     board.player_score += bonus_points
 
-                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=-1)
                                 board.evaluate_points()
 
                             else:
@@ -251,6 +258,8 @@ def main():
                             # Get Move
                             in_turn = board.players[turn]
                             moves = board.player_moves + board.opponent_moves
+                            start_time = None
+                            end_time = None
 
                             if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
@@ -279,20 +288,26 @@ def main():
                                 end_time = datetime.now()
 
                             # Update Score
-                            points = board.update_score(time=(end_time - start_time).total_seconds())
+                            if start_time is not None and end_time is not None:
+                                elapsed = (end_time - start_time).total_seconds()
+                            else:
+                                elapsed = 0
+                            points = board.update_score(time=elapsed)
 
                             if in_turn == board.players[0]: # Player
                                 board.player_score += points
                             if in_turn == board.players[1]: # Opponent
                                 board.opponent_score += points
 
-                            board.log_score(player=in_turn, points=points, move=move)
+                            board.log_score(player=in_turn, points=points, move=-1)
 
                             # Update Board
                             if in_turn == board.players[0]: # Player
-                                board.player_moves.append(int(move))
+                                if move is not None:
+                                    board.player_moves.append(int(move))
                             if in_turn == board.players[1]: # Opponent
-                                board.opponent_moves.append(int(move))
+                                if move is not None:
+                                    board.opponent_moves.append(int(move))
 
                             # Display Board
                             board.display()
@@ -307,7 +322,7 @@ def main():
                                 if in_turn == board.players[1]: # Opponent
                                     board.player_score += bonus_points
 
-                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=-1)
                                 board.evaluate_points()
 
                             else:
@@ -365,6 +380,8 @@ def main():
                             # Get Move
                             in_turn = board.players[turn]
                             moves = board.player_moves + board.opponent_moves
+                            start_time = None
+                            end_time = None
 
                             if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
@@ -393,20 +410,26 @@ def main():
                                 end_time = datetime.now()
 
                             # Update Score
-                            points = board.update_score(time=(end_time - start_time).total_seconds())
+                            if start_time is not None and end_time is not None:
+                                elapsed = (end_time - start_time).total_seconds()
+                            else:
+                                elapsed = 0
+                            points = board.update_score(time=elapsed)
 
                             if in_turn == board.players[0]: # Player
                                 board.player_score += points
                             if in_turn == board.players[1]: # Opponent
                                 board.opponent_score += points
 
-                            board.log_score(player=in_turn, points=points, move=move)
+                            board.log_score(player=in_turn, points=points, move=-1)
 
                             # Update Board
                             if in_turn == board.players[0]: # Player
-                                board.player_moves.append(int(move))
+                                if move is not None:
+                                    board.player_moves.append(int(move))
                             if in_turn == board.players[1]: # Opponent
-                                board.opponent_moves.append(int(move))
+                                if move is not None:
+                                    board.opponent_moves.append(int(move))
 
                             # Display Board
                             board.display()
@@ -421,7 +444,7 @@ def main():
                                 if in_turn == board.players[1]: # Opponent
                                     board.player_score += bonus_points
 
-                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=-1)
                                 board.evaluate_points()
 
                             else:
@@ -510,6 +533,8 @@ def main():
                             in_turn = board.players[turn]
                             moves = board.player_moves + board.opponent_moves
                             move = None
+                            start_time = None
+                            end_time = None
 
                             if in_turn == board.players[0]: # Player
                                 start_time = datetime.now()
@@ -550,7 +575,11 @@ def main():
                                 end_time = datetime.now()
 
                             # Update Score
-                            points = board.update_score(time=(end_time - start_time).total_seconds())
+                            if start_time is not None and end_time is not None:
+                                elapsed = (end_time - start_time).total_seconds()
+                            else:
+                                elapsed = 0
+                            points = board.update_score(time=elapsed)
 
                             if in_turn == board.players[0]: # Player
                                 if move is not None:
@@ -559,7 +588,7 @@ def main():
                                 if move is not None:
                                     board.opponent_score += points
 
-                            board.log_score(player=in_turn, points=points, move=move)
+                            board.log_score(player=in_turn, points=points, move=-1)
 
                             # Update Board
                             if in_turn == board.players[0]: # Player
@@ -582,7 +611,7 @@ def main():
                                 if in_turn == board.players[1]: # Opponent
                                     board.player_score += bonus_points
 
-                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=None)
+                                board.log_score(player=board.players[1 - turn], points=bonus_points, move=-1)
                                 board.evaluate_points()
 
                             else:
