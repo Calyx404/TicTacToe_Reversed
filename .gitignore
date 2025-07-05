@@ -1,2 +1,18 @@
-__pycache__*
-./logs/game.log
+# Python cache directories
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Runtime data
+runtime/logs/app.log
+runtime/data/accounts.json
+
+# Application icon
+app.ico
+
+# Additional common patterns
+*.log
+*.tmp
+.env
+.DS_Store
+Thumbs.db
